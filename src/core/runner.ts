@@ -547,9 +547,9 @@ export class BitbucketPipelinesRunner implements CLICommand {
         
         for (let i = 0; i < settledResults.length; i++) {
           const result = settledResults[i];
-          if (result.status === 'fulfilled') {
+          if (result && result.status === 'fulfilled') {
             results.push(result.value);
-          } else {
+          } else if (result && result.status === 'rejected') {
             const step = steps[i];
             results.push({
               name: step?.name || `Parallel Step ${i + 1}`,

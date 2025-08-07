@@ -18,7 +18,7 @@ export interface CLICommand {
   run(options: CLIOptions): Promise<void>;
   validate(options: CLIOptions): Promise<boolean>;
   listPipelines(): Promise<string[]>;
-  clearCache(): Promise<void>;
+  clearCache(options?: { cache?: boolean; artifacts?: boolean }): Promise<void>;
 }
 
 // Bitbucket Pipelines設定のインターフェース

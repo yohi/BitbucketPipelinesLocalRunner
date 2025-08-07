@@ -138,10 +138,11 @@ program
 
       logger.info(chalk.blue('🧹 Cleaning up local data'));
 
-      await runner.clearCache({
-        ...(options.cache !== undefined && { cache: options.cache }),
-        ...(options.artifacts !== undefined && { artifacts: options.artifacts })
-      });
+      const clearOptions: { cache?: boolean; artifacts?: boolean } = {};
+      if (options.cache !== undefined) clearOptions.cache = options.cache;
+      if (options.artifacts !== undefined) clearOptions.artifacts = options.artifacts;
+      
+      await runner.clearCache(Object.keys(clearOptions).length > 0 ? clearOptions : undefined);
 
       logger.info(chalk.green('✅ Cleanup completed'));
     } catch (error) {
