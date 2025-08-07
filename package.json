@@ -1,0 +1,73 @@
+{
+  "name": "bitbucket-pipelines-local-runner",
+  "version": "1.0.0",
+  "description": "Local runner for Bitbucket Pipelines that allows developers to test pipeline configurations locally using Docker",
+  "main": "dist/index.js",
+  "bin": {
+    "bbpl": "dist/cli.js",
+    "bitbucket-pipelines-local": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:e2e": "jest --config jest.e2e.config.js",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "clean": "rm -rf dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yohi/BitbucketPipelinesLocalRunner.git"
+  },
+  "keywords": [
+    "bitbucket",
+    "pipelines",
+    "ci/cd",
+    "docker",
+    "local",
+    "testing",
+    "devops"
+  ],
+  "author": "yohi",
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/yohi/BitbucketPipelinesLocalRunner/issues"
+  },
+  "homepage": "https://github.com/yohi/BitbucketPipelinesLocalRunner#readme",
+  "dependencies": {
+    "yaml": "^2.5.1",
+    "commander": "^12.1.0",
+    "dockerode": "^4.0.2",
+    "winston": "^3.17.0",
+    "glob": "^10.4.5",
+    "tar": "^7.4.3",
+    "dotenv": "^16.4.7",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "inquirer": "^8.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.0",
+    "@types/jest": "^29.5.14",
+    "@types/dockerode": "^3.3.32",
+    "@types/tar": "^6.1.13",
+    "@types/inquirer": "^8.2.10",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2",
+    "eslint": "^8.57.1",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "prettier": "^3.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
