@@ -11,6 +11,7 @@ import {
   Definitions,
   GlobalOptions
 } from '../interfaces';
+import { isStep, isParallelSteps } from '../utils/type-guards';
 
 export class PipelineValidator implements IPipelineValidator {
   private readonly SUPPORTED_SIZES = ['1x', '2x', '4x', '8x', '16x'];
@@ -118,7 +119,7 @@ export class PipelineValidator implements IPipelineValidator {
     // pull-requests
     if (pipelines.pullrequests) {
       Object.entries(pipelines.pullrequests).forEach(([pattern, pipeline]: [string, any]) => {
-        this.validatePipeline(pipeline, `pipelines.pull-requests.${pattern}`, errors, warnings);
+        this.validatePipeline(pipeline, `pipelines.pullrequests.${pattern}`, errors, warnings);
       });
     }
 
@@ -164,9 +165,9 @@ export class PipelineValidator implements IPipelineValidator {
     pipeline.forEach((item, index) => {
       const itemPath = `${path}[${index}]`;
 
-      if (this.isStep(item)) {
+      if (isStep(item)) {
         this.validateSingleStep(item, itemPath, errors, warnings);
-      } else if (this.isParallelSteps(item)) {
+      } else if (isParallelSteps(item)) {
         this.validateParallelSteps(item, itemPath, errors, warnings);
       } else {
         errors.push({
@@ -525,17 +526,4 @@ export class PipelineValidator implements IPipelineValidator {
     }
   }
 
-  /**
-   * アイテムがステップかどうかを判定
-   */
-  private isStep(item: any): item is Step {
-    return item && typeof item === 'object' && item.script && !item.parallel;
-  }
-
-  /**
-   * アイテムが並列ステップかどうかを判定
-   */
-  private isParallelSteps(item: any): item is ParallelSteps {
-    return item && typeof item === 'object' && item.parallel;
-  }
 }

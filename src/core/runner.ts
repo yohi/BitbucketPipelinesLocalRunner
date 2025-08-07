@@ -25,6 +25,7 @@ import {
   ErrorType,
   PipelineContext
 } from '../interfaces';
+import { isStep, isParallelSteps } from '../utils/type-guards';
 
 export class BitbucketPipelinesRunner implements CLICommand {
   private config: LocalRunnerConfig;
@@ -359,7 +360,7 @@ export class BitbucketPipelinesRunner implements CLICommand {
       for (let i = 0; i < pipeline.length; i++) {
         const pipelineItem = pipeline[i];
 
-        if (this.isStep(pipelineItem)) {
+        if (isStep(pipelineItem)) {
           this.logger.info(chalk.blue(`📋 Step ${i + 1}/${pipeline.length}`));
           const result = await this.executeStep(pipelineItem, context, options);
           stepResults.push(result);
@@ -369,7 +370,7 @@ export class BitbucketPipelinesRunner implements CLICommand {
             error = result.error;
             break;
           }
-        } else if (this.isParallelSteps(pipelineItem)) {
+        } else if (isParallelSteps(pipelineItem)) {
           this.logger.info(chalk.blue(`📋 Parallel steps ${i + 1}/${pipeline.length} (${pipelineItem.parallel.steps.length} parallel)`));
           const results = await this.executeParallelSteps(pipelineItem, context, options);
           stepResults.push(...results);
@@ -526,51 +527,25 @@ export class BitbucketPipelinesRunner implements CLICommand {
 
     if (failFast) {
       // fail-fast: 最初の失敗で即座に停止
-      const abortController = new AbortController();
-      let firstFailureIndex = -1;
-      
-      const enhancedPromises = stepPromises.map(async (promise, index) => {
-        try {
-          const result = await promise;
-          if (!result.success && firstFailureIndex === -1) {
-            firstFailureIndex = index;
-            abortController.abort();
-          }
-          return result;
-        } catch (error) {
-          if (firstFailureIndex === -1) {
-            firstFailureIndex = index;
-            abortController.abort();
-          }
-          throw error;
-        }
-      });
-
-      // 最初の失敗または全成功まで実行
       try {
-        return await Promise.all(enhancedPromises);
+        return await Promise.all(stepPromises);
       } catch (error) {
-        // 失敗時は完了済みの結果を取得し、残りは中止として扱う
+        // 失敗時は結果を収集し、失敗したステップ以降は中止扱いにする
         const results: StepResult[] = [];
-        for (let i = 0; i < stepPromises.length; i++) {
-          if (i <= firstFailureIndex) {
-            try {
-              const result = await stepPromises[i];
-              if (result) {
-                results.push(result);
-              }
-            } catch (stepError) {
-              const step = steps[i];
-              results.push({
-                name: step?.name || `Parallel Step ${i + 1}`,
-                success: false,
-                exitCode: 1,
-                duration: 0,
-                logs: [],
-                error: stepError instanceof Error ? stepError : new Error('Step execution failed')
-              });
+        const settledResults = await Promise.allSettled(stepPromises);
+        
+        let firstFailureIndex = -1;
+        for (let i = 0; i < settledResults.length; i++) {
+          const result = settledResults[i];
+          if (result?.status === 'fulfilled') {
+            results.push(result.value);
+            if (!result.value.success && firstFailureIndex === -1) {
+              firstFailureIndex = i;
             }
-          } else {
+          } else if (result?.status === 'rejected') {
+            if (firstFailureIndex === -1) {
+              firstFailureIndex = i;
+            }
             const step = steps[i];
             results.push({
               name: step?.name || `Parallel Step ${i + 1}`,
@@ -578,10 +553,28 @@ export class BitbucketPipelinesRunner implements CLICommand {
               exitCode: 1,
               duration: 0,
               logs: [],
-              error: new Error('Step execution aborted due to fail-fast')
+              error: result.reason instanceof Error ? result.reason : new Error('Step execution failed')
             });
           }
         }
+
+        // 失敗したステップ以降のものは中止として扱う
+        if (firstFailureIndex !== -1) {
+          for (let i = firstFailureIndex + 1; i < steps.length; i++) {
+            const step = steps[i];
+            if (results[i] && results[i]?.success && step) {
+              results[i] = {
+                name: step.name || `Parallel Step ${i + 1}`,
+                success: false,
+                exitCode: 1,
+                duration: 0,
+                logs: [],
+                error: new Error('Step execution aborted due to fail-fast')
+              };
+            }
+          }
+        }
+        
         return results;
       }
     } else {
@@ -669,17 +662,4 @@ export class BitbucketPipelinesRunner implements CLICommand {
     }
   }
 
-  /**
-   * アイテムがステップかどうかを判定
-   */
-  private isStep(item: any): item is Step {
-    return item && typeof item === 'object' && item.script && !item.parallel;
-  }
-
-  /**
-   * アイテムが並列ステップかどうかを判定
-   */
-  private isParallelSteps(item: any): item is ParallelSteps {
-    return item && typeof item === 'object' && item.parallel;
-  }
 }
