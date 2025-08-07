@@ -1,0 +1,42 @@
+# Bitbucket Pipelines Local Runner Configuration
+# This file allows you to customize the local runner behavior
+
+docker:
+  defaultImage: "node:18"
+  registry:
+    url: "https://index.docker.io/v1/"
+    # username: 'your-username'
+    # password: 'your-password'
+
+  resourceLimits:
+    memory:
+      "1x": "4g"
+      "2x": "8g"
+      "4x": "16g"
+    cpu:
+      "1x": "2"
+      "2x": "4"
+      "4x": "8"
+
+logging:
+  level: "info"
+  format: "text"
+  showDockerCommands: false
+  showTimestamps: true
+
+environment:
+  bitbucketVariables:
+    BITBUCKET_WORKSPACE: "example-workspace"
+    BITBUCKET_REPO_SLUG: "example-repo"
+    BITBUCKET_BRANCH: "develop"
+
+  # secureVariables:
+  #   API_KEY: 'your-secret-api-key'
+  #   DB_PASSWORD: 'your-db-password'
+
+cache:
+  path: "~/.bitbucket-pipelines-local/cache"
+
+artifacts:
+  baseDir: "~/.bitbucket-pipelines-local/artifacts"
+  enabled: true

@@ -1,0 +1,239 @@
+# Bitbucket Pipelines Local Runner - .gitignore
+
+# ======================
+# Dependencies
+# ======================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ======================
+# Build Output
+# ======================
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# ======================
+# Environment Variables
+# ======================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Security files
+*.key
+*.pem
+*.p12
+*.pfx
+
+# ======================
+# Testing
+# ======================
+coverage/
+*.lcov
+.nyc_output/
+test-results/
+junit.xml
+.jest-cache/
+
+# ======================
+# Logs
+# ======================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# ======================
+# Runtime data
+# ======================
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ======================
+# IDE / Editor
+# ======================
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# ======================
+# OS Files
+# ======================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ======================
+# Temporary files
+# ======================
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# ======================
+# Package managers
+# ======================
+.pnp.*
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.js
+
+# ======================
+# Bitbucket Pipelines Local Runner Specific
+# ======================
+
+# Local cache and artifacts (default locations)
+.bitbucket-pipelines-local/
+**/.bbpl-cache/
+**/.bbpl-artifacts/
+
+# Docker-related temporary files
+.docker/
+docker-compose.override.yml
+
+# Pipeline execution artifacts
+artifacts/
+cache/
+.cache/
+
+# Local configuration overrides
+.bitbucket-pipelines-local.override.yml
+bitbucket-pipelines.local.yml
+
+# Test pipeline configurations
+test-pipelines/
+*.test.yml
+
+# ======================
+# Documentation Build
+# ======================
+docs/build/
+docs/.vuepress/dist/
+
+# ======================
+# Misc
+# ======================
+.eslintcache
+.stylelintcache
+*.tgz
+*.tar.gz
+
+# ======================
+# Optional npm cache directory
+# ======================
+.npm
+
+# ======================
+# Optional eslint cache
+# ======================
+.eslintcache
+
+# ======================
+# Microbundle cache
+# ======================
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# ======================
+# Optional REPL history
+# ======================
+.node_repl_history
+
+# ======================
+# Output of 'npm pack'
+# ======================
+*.tgz
+
+# ======================
+# Yarn Integrity file
+# ======================
+.yarn-integrity
+
+# ======================
+# parcel-bundler cache
+# ======================
+.cache
+.parcel-cache
+
+# ======================
+# Next.js build output
+# ======================
+.next
+
+# ======================
+# Nuxt.js build / generate output
+# ======================
+.nuxt
+dist
+
+# ======================
+# Gatsby files
+# ======================
+.cache/
+public
+
+# ======================
+# Storybook build outputs
+# ======================
+.out
+.storybook-out
+
+# ======================
+# Temporary folders
+# ======================
+.tmp
+.temp
+
+# ======================
+# Serverless directories
+# ======================
+.serverless/
+
+# ======================
+# FuseBox cache
+# ======================
+.fusebox/
+
+# ======================
+# DynamoDB Local files
+# ======================
+.dynamodb/
+
+# ======================
+# TernJS port file
+# ======================
+.tern-port

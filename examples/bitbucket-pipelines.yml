@@ -1,0 +1,117 @@
+# Sample Bitbucket Pipelines configuration for testing
+image: node:18
+
+definitions:
+  caches:
+    node: node_modules
+
+  services:
+    postgres:
+      image: postgres:13
+      variables:
+        POSTGRES_PASSWORD: test
+        POSTGRES_DB: testdb
+
+pipelines:
+  default:
+    - step:
+        name: Install Dependencies
+        caches:
+          - node
+        script:
+          - npm install
+        artifacts:
+          - node_modules/**
+
+    - step:
+        name: Run Tests
+        services:
+          - postgres
+        script:
+          - npm test
+          - npm run lint
+        artifacts:
+          - test-results/**
+          - coverage/**
+
+    - step:
+        name: Build Application
+        script:
+          - npm run build
+        artifacts:
+          - dist/**
+
+  branches:
+    master:
+      - step:
+          name: Production Build
+          script:
+            - npm install --production
+            - npm run build:prod
+          artifacts:
+            - dist/**
+
+      - step:
+          name: Deploy
+          deployment: production
+          script:
+            - echo "Deploying to production..."
+
+  custom:
+    security-scan:
+      - step:
+          name: Security Scan
+          script:
+            - npm audit
+            - npm run security-scan
+
+    performance-test:
+      - parallel:
+          fail-fast: false
+          steps:
+            - step:
+                name: Load Test
+                script:
+                  - npm run load-test
+                artifacts:
+                  - load-test-results/**
+
+            - step:
+                name: Performance Benchmark
+                script:
+                  - npm run benchmark
+                artifacts:
+                  - benchmark-results/**
+
+    full-test-suite:
+      - step:
+          name: Setup
+          script:
+            - npm install
+          artifacts:
+            - node_modules/**
+
+      - parallel:
+          fail-fast: true
+          steps:
+            - step:
+                name: Unit Tests
+                script:
+                  - npm run test:unit
+
+            - step:
+                name: Integration Tests
+                services:
+                  - postgres
+                script:
+                  - npm run test:integration
+
+            - step:
+                name: E2E Tests
+                script:
+                  - npm run test:e2e
+
+      - step:
+          name: Report Results
+          script:
+            - npm run test:report
