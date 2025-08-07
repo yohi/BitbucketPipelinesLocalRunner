@@ -527,25 +527,29 @@ export class BitbucketPipelinesRunner implements CLICommand {
 
     if (failFast) {
       // fail-fast: 最初の失敗で即座に停止
+      const results: StepResult[] = [];
+      
+      // レース条件で最初の失敗を検出
       try {
-        return await Promise.all(stepPromises);
-      } catch (error) {
-        // 失敗時は結果を収集し、失敗したステップ以降は中止扱いにする
-        const results: StepResult[] = [];
+        // 最初の失敗が発生した時点で拒否される
+        await Promise.all(stepPromises);
+        // 全て成功した場合、結果を収集
+        const settledResults = await Promise.allSettled(stepPromises);
+        for (const result of settledResults) {
+          if (result.status === 'fulfilled') {
+            results.push(result.value);
+          }
+        }
+        return results;
+      } catch {
+        // 失敗が発生した場合、完了した結果のみを収集
         const settledResults = await Promise.allSettled(stepPromises);
         
-        let firstFailureIndex = -1;
         for (let i = 0; i < settledResults.length; i++) {
           const result = settledResults[i];
-          if (result?.status === 'fulfilled') {
+          if (result.status === 'fulfilled') {
             results.push(result.value);
-            if (!result.value.success && firstFailureIndex === -1) {
-              firstFailureIndex = i;
-            }
-          } else if (result?.status === 'rejected') {
-            if (firstFailureIndex === -1) {
-              firstFailureIndex = i;
-            }
+          } else {
             const step = steps[i];
             results.push({
               name: step?.name || `Parallel Step ${i + 1}`,
@@ -557,24 +561,6 @@ export class BitbucketPipelinesRunner implements CLICommand {
             });
           }
         }
-
-        // 失敗したステップ以降のものは中止として扱う
-        if (firstFailureIndex !== -1) {
-          for (let i = firstFailureIndex + 1; i < steps.length; i++) {
-            const step = steps[i];
-            if (results[i] && results[i]?.success && step) {
-              results[i] = {
-                name: step.name || `Parallel Step ${i + 1}`,
-                success: false,
-                exitCode: 1,
-                duration: 0,
-                logs: [],
-                error: new Error('Step execution aborted due to fail-fast')
-              };
-            }
-          }
-        }
-        
         return results;
       }
     } else {
