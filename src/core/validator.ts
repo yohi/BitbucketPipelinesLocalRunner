@@ -5,7 +5,11 @@ import {
   ValidationResult,
   ValidationError,
   ValidationWarning,
-  ParallelSteps
+  ParallelSteps,
+  Pipeline,
+  Pipelines,
+  Definitions,
+  GlobalOptions
 } from '../interfaces';
 
 export class PipelineValidator implements IPipelineValidator {
@@ -91,7 +95,7 @@ export class PipelineValidator implements IPipelineValidator {
   /**
    * パイプライン群をバリデーション
    */
-  private validatePipelines(pipelines: any, errors: ValidationError[], warnings: ValidationWarning[]): void {
+  private validatePipelines(pipelines: Pipelines, errors: ValidationError[], warnings: ValidationWarning[]): void {
     // default
     if (pipelines.default) {
       this.validatePipeline(pipelines.default, 'pipelines.default', errors, warnings);
@@ -138,7 +142,7 @@ export class PipelineValidator implements IPipelineValidator {
   /**
    * 単一パイプラインをバリデーション
    */
-  private validatePipeline(pipeline: any[], path: string, errors: ValidationError[], warnings: ValidationWarning[]): void {
+  private validatePipeline(pipeline: Pipeline, path: string, errors: ValidationError[], warnings: ValidationWarning[]): void {
     if (!Array.isArray(pipeline)) {
       errors.push({
         path,
@@ -364,7 +368,7 @@ export class PipelineValidator implements IPipelineValidator {
   /**
    * definitions をバリデーション
    */
-  private validateDefinitions(definitions: any, errors: ValidationError[], warnings: ValidationWarning[]): void {
+  private validateDefinitions(definitions: Definitions, errors: ValidationError[], warnings: ValidationWarning[]): void {
     // services のバリデーション
     if (definitions.services) {
       Object.entries(definitions.services).forEach(([name, service]: [string, any]) => {
@@ -430,7 +434,7 @@ export class PipelineValidator implements IPipelineValidator {
   /**
    * グローバルオプションをバリデーション
    */
-  private validateGlobalOptions(options: any, errors: ValidationError[], _warnings: ValidationWarning[]): void {
+  private validateGlobalOptions(options: GlobalOptions, errors: ValidationError[], _warnings: ValidationWarning[]): void {
     if (options.size && !this.SUPPORTED_SIZES.includes(options.size)) {
       errors.push({
         path: 'options.size',

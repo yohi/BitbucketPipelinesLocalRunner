@@ -14,6 +14,7 @@ import {
   CLIOptions,
   LocalRunnerConfig,
   PipelineConfig,
+  Pipeline,
   ExecutionOptions,
   ExecutionResult,
   ExecutionContext,
@@ -232,7 +233,7 @@ export class BitbucketPipelinesRunner implements CLICommand {
   /**
    * 実行するパイプラインを選択
    */
-  private selectPipeline(config: PipelineConfig, options: CLIOptions): any[] {
+  private selectPipeline(config: PipelineConfig, options: CLIOptions): Pipeline {
     // カスタムパイプライン
     if (options.custom) {
       if (!config.pipelines.custom || !config.pipelines.custom[options.custom]) {
@@ -343,7 +344,7 @@ export class BitbucketPipelinesRunner implements CLICommand {
    * パイプラインを実行
    */
   private async executePipeline(
-    pipeline: any[],
+    pipeline: Pipeline,
     context: ExecutionContext,
     options: ExecutionOptions
   ): Promise<ExecutionResult> {
@@ -524,42 +525,62 @@ export class BitbucketPipelinesRunner implements CLICommand {
     );
 
     if (failFast) {
-      // fail-fast: 最初の失敗で全体を停止
+      // fail-fast: 最初の失敗で即座に停止
       const abortController = new AbortController();
-      const results: StepResult[] = [];
+      let firstFailureIndex = -1;
       
+      const enhancedPromises = stepPromises.map(async (promise, index) => {
+        try {
+          const result = await promise;
+          if (!result.success && firstFailureIndex === -1) {
+            firstFailureIndex = index;
+            abortController.abort();
+          }
+          return result;
+        } catch (error) {
+          if (firstFailureIndex === -1) {
+            firstFailureIndex = index;
+            abortController.abort();
+          }
+          throw error;
+        }
+      });
+
+      // 最初の失敗または全成功まで実行
       try {
-        const racePromise = Promise.allSettled(
-          stepPromises.map(async (promise, index) => {
-            const result = await promise;
-            if (!result.success && !abortController.signal.aborted) {
-              abortController.abort();
-            }
-            return { result, index };
-          })
-        );
-
-        const settledResults = await racePromise;
-        
-        // インデックス順に結果を並べ直し
-        const sortedResults = settledResults
-          .filter(r => r.status === 'fulfilled')
-          .sort((a, b) => a.value.index - b.value.index)
-          .map(r => r.value.result);
-
-        return sortedResults;
+        return await Promise.all(enhancedPromises);
       } catch (error) {
-        // 既に結果があるものはそのまま返し、残りは失敗として扱う
-        while (results.length < steps.length) {
-          const stepIndex = results.length;
-          results.push({
-            name: steps[stepIndex]?.name || `Parallel Step ${stepIndex + 1}`,
-            success: false,
-            exitCode: 1,
-            duration: 0,
-            logs: [],
-            error: new Error('Step execution aborted due to fail-fast')
-          });
+        // 失敗時は完了済みの結果を取得し、残りは中止として扱う
+        const results: StepResult[] = [];
+        for (let i = 0; i < stepPromises.length; i++) {
+          if (i <= firstFailureIndex) {
+            try {
+              const result = await stepPromises[i];
+              if (result) {
+                results.push(result);
+              }
+            } catch (stepError) {
+              const step = steps[i];
+              results.push({
+                name: step?.name || `Parallel Step ${i + 1}`,
+                success: false,
+                exitCode: 1,
+                duration: 0,
+                logs: [],
+                error: stepError instanceof Error ? stepError : new Error('Step execution failed')
+              });
+            }
+          } else {
+            const step = steps[i];
+            results.push({
+              name: step?.name || `Parallel Step ${i + 1}`,
+              success: false,
+              exitCode: 1,
+              duration: 0,
+              logs: [],
+              error: new Error('Step execution aborted due to fail-fast')
+            });
+          }
         }
         return results;
       }
