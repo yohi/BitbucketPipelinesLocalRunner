@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import * as os from 'os';
 import chalk from 'chalk';
 import { YAMLParser } from './yaml-parser';
 import { PipelineValidator } from './validator';
@@ -186,11 +187,24 @@ export class BitbucketPipelinesRunner implements CLICommand {
   /**
    * キャッシュをクリア
    */
-  async clearCache(): Promise<void> {
+  async clearCache(options?: { cache?: boolean; artifacts?: boolean }): Promise<void> {
     try {
-      await this.cacheManager.clearCache();
-      await this.artifactManager.clearArtifacts();
-      this.logger.success('Cache and artifacts cleared');
+      const clearCache = options?.cache !== false && (options?.cache === true || (!options?.cache && !options?.artifacts));
+      const clearArtifacts = options?.artifacts !== false && (options?.artifacts === true || (!options?.cache && !options?.artifacts));
+
+      if (clearCache) {
+        await this.cacheManager.clearCache();
+        this.logger.success('Cache cleared');
+      }
+
+      if (clearArtifacts) {
+        await this.artifactManager.clearArtifacts();
+        this.logger.success('Artifacts cleared');
+      }
+
+      if (!clearCache && !clearArtifacts) {
+        this.logger.info('Nothing to clear - no options specified');
+      }
     } catch (error) {
       this.logger.error(`Failed to clear cache: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
@@ -511,17 +525,44 @@ export class BitbucketPipelinesRunner implements CLICommand {
 
     if (failFast) {
       // fail-fast: 最初の失敗で全体を停止
-      const results = await Promise.allSettled(stepPromises);
-      return results.map(result =>
-        result.status === 'fulfilled' ? result.value : {
-          name: 'Failed Step',
-          success: false,
-          exitCode: 1,
-          duration: 0,
-          logs: [],
-          error: new Error('Step execution failed')
+      const abortController = new AbortController();
+      const results: StepResult[] = [];
+      
+      try {
+        const racePromise = Promise.allSettled(
+          stepPromises.map(async (promise, index) => {
+            const result = await promise;
+            if (!result.success && !abortController.signal.aborted) {
+              abortController.abort();
+            }
+            return { result, index };
+          })
+        );
+
+        const settledResults = await racePromise;
+        
+        // インデックス順に結果を並べ直し
+        const sortedResults = settledResults
+          .filter(r => r.status === 'fulfilled')
+          .sort((a, b) => a.value.index - b.value.index)
+          .map(r => r.value.result);
+
+        return sortedResults;
+      } catch (error) {
+        // 既に結果があるものはそのまま返し、残りは失敗として扱う
+        while (results.length < steps.length) {
+          const stepIndex = results.length;
+          results.push({
+            name: steps[stepIndex]?.name || `Parallel Step ${stepIndex + 1}`,
+            success: false,
+            exitCode: 1,
+            duration: 0,
+            logs: [],
+            error: new Error('Step execution aborted due to fail-fast')
+          });
         }
-      );
+        return results;
+      }
     } else {
       // 全ステップの完了を待機
       return Promise.all(stepPromises);
@@ -575,7 +616,14 @@ export class BitbucketPipelinesRunner implements CLICommand {
       docker: '/var/lib/docker'
     };
 
-    return predefinedCaches[cacheName] || cacheName;
+    const cachePath = predefinedCaches[cacheName] || cacheName;
+    
+    // '~'を含むパスをホームディレクトリに展開
+    if (cachePath.startsWith('~/')) {
+      return path.join(os.homedir(), cachePath.slice(2));
+    }
+    
+    return cachePath;
   }
 
   /**

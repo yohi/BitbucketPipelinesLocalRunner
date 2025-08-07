@@ -138,7 +138,10 @@ program
 
       logger.info(chalk.blue('🧹 Cleaning up local data'));
 
-      await runner.clearCache();
+      await runner.clearCache({
+        ...(options.cache !== undefined && { cache: options.cache }),
+        ...(options.artifacts !== undefined && { artifacts: options.artifacts })
+      });
 
       logger.info(chalk.green('✅ Cleanup completed'));
     } catch (error) {
