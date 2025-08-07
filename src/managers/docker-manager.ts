@@ -276,11 +276,12 @@ export class DockerManager implements IDockerManager {
       // スクリプトを実行可能な形式に変換
       const script = step.script.join('\n');
       const scriptFile = '/tmp/bbpl-script.sh';
+      const encodedScript = Buffer.from(script).toString('base64');
 
       // コンテナ設定を作成
       const containerConfig: ContainerConfig = {
         image,
-        command: ['/bin/bash', '-c', `echo '${script.replace(/'/g, "'\\''")}' > ${scriptFile} && chmod +x ${scriptFile} && ${scriptFile}`],
+        command: ['/bin/bash', '-c', `echo '${encodedScript}' | base64 -d > ${scriptFile} && chmod +x ${scriptFile} && ${scriptFile}`],
         environment: context.environment,
         volumes: [
           {
@@ -299,12 +300,13 @@ export class DockerManager implements IDockerManager {
       if (step.afterScript && step.afterScript.length > 0) {
         const afterScript = step.afterScript.join('\n');
         const afterScriptFile = '/tmp/bbpl-after-script.sh';
+        const encodedAfterScript = Buffer.from(afterScript).toString('base64');
 
         // メインスクリプトに after-script の実行を追加
         containerConfig.command = [
           '/bin/bash', '-c',
-          `echo '${script.replace(/'/g, "'\\''")}' > ${scriptFile} && ` +
-          `echo '${afterScript.replace(/'/g, "'\\''")}' > ${afterScriptFile} && ` +
+          `echo '${encodedScript}' | base64 -d > ${scriptFile} && ` +
+          `echo '${encodedAfterScript}' | base64 -d > ${afterScriptFile} && ` +
           `chmod +x ${scriptFile} ${afterScriptFile} && ` +
           `(${scriptFile}; exit_code=$?; ${afterScriptFile}; exit $exit_code)`
         ];

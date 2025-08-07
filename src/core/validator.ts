@@ -114,7 +114,7 @@ export class PipelineValidator implements IPipelineValidator {
     // pull-requests
     if (pipelines.pullrequests) {
       Object.entries(pipelines.pullrequests).forEach(([pattern, pipeline]: [string, any]) => {
-        this.validatePipeline(pipeline, `pipelines.pull-requests.${pattern}`, errors, warnings);
+        this.validatePipeline(pipeline, `pipelines.pullrequests.${pattern}`, errors, warnings);
       });
     }
 

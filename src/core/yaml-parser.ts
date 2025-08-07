@@ -291,10 +291,9 @@ export class YAMLParser implements IYAMLParser {
    */
   private transformStep(step: any): any {
     if (!step.script) {
-      console.error('Step without script:', JSON.stringify(step, null, 2));
       throw new PipelineError(
         ErrorType.VALIDATION_ERROR,
-        `Step must contain script. Got: ${JSON.stringify(step)}`
+        `Step must contain script. Got: ${JSON.stringify(step, null, 2)}`
       );
     }
 

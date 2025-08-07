@@ -20,7 +20,11 @@ export class Logger implements ILogger {
             winston.format.colorize(),
             winston.format.simple(),
             winston.format.printf(({ level, message, timestamp, ...meta }) => {
-              const time = chalk.gray(`[${new Date(timestamp as string).toLocaleTimeString()}]`);
+              const timestampValue = typeof timestamp === 'string' ? timestamp : 
+                                   timestamp instanceof Date ? timestamp.toISOString() :
+                                   typeof timestamp === 'number' ? new Date(timestamp).toISOString() :
+                                   new Date().toISOString();
+              const time = chalk.gray(`[${new Date(timestampValue).toLocaleTimeString()}]`);
               return `${time} ${level}: ${message}${Object.keys(meta).length ? ' ' + JSON.stringify(meta) : ''}`;
             })
           )
@@ -108,7 +112,7 @@ export class Logger implements ILogger {
 
   // 進行状況のログ
   progress(current: number, total: number, message: string): void {
-    const percentage = Math.round((current / total) * 100);
+    const percentage = total === 0 ? 0 : Math.round((current / total) * 100);
     const bar = this.createProgressBar(percentage);
     this.info(`${bar} ${percentage}% ${message}`);
   }

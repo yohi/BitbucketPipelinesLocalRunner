@@ -105,7 +105,6 @@ export class BitbucketPipelinesRunner implements CLICommand {
       }
 
     } catch (error) {
-      await this.cleanup();
       throw error;
     } finally {
       await this.cleanup();
