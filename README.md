@@ -92,58 +92,58 @@ bbpl run --dry-run --verbose
 bbpl run --config .bbpl-config.yml --env-file .env.production
 ```
 
-### `validate` - Validate Configuration
+### `validate` - 設定の検証
 
-Validate your `bitbucket-pipelines.yml` configuration file.
+`bitbucket-pipelines.yml`設定ファイルを検証します。
 
 ```bash
 bbpl validate [options]
 
-Options:
-  -v, --verbose           Enable verbose logging
-  --config <path>         Path to configuration file
+オプション:
+  -v, --verbose           詳細ログを有効にする
+  --config <path>         設定ファイルのパス
 ```
 
-### `list` - List Pipelines
+### `list` - パイプライン一覧
 
-Display all available pipelines in your configuration.
+設定内のすべての利用可能なパイプラインを表示します。
 
 ```bash
 bbpl list [options]
 
-Options:
-  -v, --verbose           Enable verbose logging
+オプション:
+  -v, --verbose           詳細ログを有効にする
 ```
 
-### `clean` - Clean Up
+### `clean` - クリーンアップ
 
-Clean local cache and artifacts.
+ローカルキャッシュとアーティファクトをクリーンアップします。
 
 ```bash
 bbpl clean [options]
 
-Options:
-  -v, --verbose           Enable verbose logging
-  --cache                 Clear cache only
-  --artifacts             Clear artifacts only
+オプション:
+  -v, --verbose           詳細ログを有効にする
+  --cache                 キャッシュのみをクリア
+  --artifacts             アーティファクトのみをクリア
 ```
 
-### `init` - Initialize Configuration
+### `init` - 設定の初期化
 
-Create initial local runner configuration file.
+初期ローカルランナー設定ファイルを作成します。
 
 ```bash
 bbpl init [options]
 
-Options:
-  -v, --verbose           Enable verbose logging
+オプション:
+  -v, --verbose           詳細ログを有効にする
 ```
 
-## ⚙️ Configuration
+## ⚙️ 設定
 
-### Local Runner Configuration
+### ローカルランナー設定
 
-Create `.bitbucket-pipelines-local.yml` in your project root:
+プロジェクトルートに`.bitbucket-pipelines-local.yml`を作成します：
 
 ```yaml
 docker:
@@ -182,9 +182,9 @@ environment:
   envFile: ".env"
 ```
 
-### Environment Variables
+### 環境変数
 
-The tool supports standard Bitbucket environment variables:
+このツールは標準的なBitbucket環境変数をサポートします：
 
 - `BITBUCKET_BRANCH`
 - `BITBUCKET_COMMIT`
@@ -193,117 +193,117 @@ The tool supports standard Bitbucket environment variables:
 - `BITBUCKET_WORKSPACE`
 - `BITBUCKET_REPO_FULL_NAME`
 
-## 🔧 Development
+## 🔧 開発
 
-### Prerequisites
+### 前提条件
 
 - Node.js >= 18.0.0
 - Docker Engine
-- npm or yarn
+- npmまたはyarn
 
-### Setup
+### セットアップ
 
 ```bash
-# Clone repository
+# リポジトリをクローン
 git clone https://github.com/yohi/BitbucketPipelinesLocalRunner.git
 cd BitbucketPipelinesLocalRunner
 
-# Install dependencies
+# 依存関係をインストール
 npm install
 
-# Build project
+# プロジェクトをビルド
 npm run build
 
-# Run in development mode
+# 開発モードで実行
 npm run dev
 
-# Run tests
+# テストを実行
 npm test
 ```
 
-### Available Scripts
+### 利用可能なスクリプト
 
 ```bash
-npm run build        # Compile TypeScript
-npm run dev          # Development mode with ts-node
-npm start            # Run compiled version
-npm test             # Run Jest tests
-npm run test:watch   # Watch mode testing
-npm run test:e2e     # End-to-end tests
-npm run lint         # ESLint checking
-npm run lint:fix     # Auto-fix ESLint issues
-npm run format       # Format code with Prettier
-npm run clean        # Remove build output
+npm run build        # TypeScriptをコンパイル
+npm run dev          # ts-nodeで開発モード
+npm start            # コンパイル済みバージョンを実行
+npm test             # Jestテストを実行
+npm run test:watch   # ウォッチモードテスト
+npm run test:e2e     # エンドツーエンドテスト
+npm run lint         # ESLintチェック
+npm run lint:fix     # ESLint問題の自動修正
+npm run format       # Prettierでコードフォーマット
+npm run clean        # ビルド出力を削除
 ```
 
-## 🏗️ Architecture
+## 🏗️ アーキテクチャ
 
-### Core Components
+### コアコンポーネント
 
-- **BitbucketPipelinesRunner** - Main execution engine
-- **DockerManager** - Docker container orchestration
-- **YAMLParser** - Pipeline configuration parsing
-- **CacheManager** - Build cache management
-- **ArtifactManager** - Artifact handling
-- **EnvironmentManager** - Environment variable management
-- **ConfigManager** - Configuration management
-- **PipelineValidator** - Configuration validation
+- **BitbucketPipelinesRunner** - メイン実行エンジン
+- **DockerManager** - Dockerコンテナオーケストレーション
+- **YAMLParser** - パイプライン設定解析
+- **CacheManager** - ビルドキャッシュ管理
+- **ArtifactManager** - アーティファクト処理
+- **EnvironmentManager** - 環境変数管理
+- **ConfigManager** - 設定管理
+- **PipelineValidator** - 設定検証
 
-### Project Structure
+### プロジェクト構造
 
 ```
 src/
-├── cli.ts                    # CLI entry point
-├── index.ts                  # Main module exports
+├── cli.ts                    # CLIエントリーポイント
+├── index.ts                  # メインモジュールエクスポート
 ├── core/
-│   ├── runner.ts            # Pipeline execution engine
-│   ├── validator.ts         # Configuration validation
-│   └── yaml-parser.ts       # YAML parsing logic
+│   ├── runner.ts            # パイプライン実行エンジン
+│   ├── validator.ts         # 設定検証
+│   └── yaml-parser.ts       # YAML解析ロジック
 ├── managers/
-│   ├── artifact-manager.ts   # Artifact handling
-│   ├── cache-manager.ts      # Cache operations
-│   ├── config-manager.ts     # Configuration management
-│   ├── docker-manager.ts     # Docker operations
-│   └── environment-manager.ts # Environment variables
+│   ├── artifact-manager.ts   # アーティファクト処理
+│   ├── cache-manager.ts      # キャッシュ操作
+│   ├── config-manager.ts     # 設定管理
+│   ├── docker-manager.ts     # Docker操作
+│   └── environment-manager.ts # 環境変数
 ├── interfaces/
-│   └── index.ts             # TypeScript interfaces
+│   └── index.ts             # TypeScriptインターフェース
 └── utils/
-    └── logger.ts            # Logging utilities
+    └── logger.ts            # ログユーティリティ
 ```
 
-## 🤝 Contributing
+## 🤝 コントリビューション
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. リポジトリをフォークする
+2. フィーチャーブランチを作成する (`git checkout -b feature/amazing-feature`)
+3. 変更をコミットする (`git commit -m 'Add amazing feature'`)
+4. ブランチにプッシュする (`git push origin feature/amazing-feature`)
+5. プルリクエストを開く
 
-### Development Guidelines
+### 開発ガイドライン
 
-- Follow TypeScript best practices
-- Write tests for new features
-- Use ESLint and Prettier for code formatting
-- Update documentation for new features
+- TypeScriptのベストプラクティスに従う
+- 新機能にテストを書く
+- コードフォーマットにESLintとPrettierを使用
+- 新機能のドキュメントを更新する
 
-## 📝 License
+## 📝 ライセンス
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+このプロジェクトはMITライセンスの下でライセンスされています - 詳細は[LICENSE](LICENSE)ファイルを参照してください。
 
-## 🙋 Support
+## 🙋 サポート
 
 - 📫 **Issues**: [GitHub Issues](https://github.com/yohi/BitbucketPipelinesLocalRunner/issues)
-- 📖 **Documentation**: [Project Wiki](https://github.com/yohi/BitbucketPipelinesLocalRunner/wiki)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/yohi/BitbucketPipelinesLocalRunner/discussions)
+- 📖 **ドキュメント**: [Project Wiki](https://github.com/yohi/BitbucketPipelinesLocalRunner/wiki)
+- 💬 **ディスカッション**: [GitHub Discussions](https://github.com/yohi/BitbucketPipelinesLocalRunner/discussions)
 
-## 🎯 Roadmap
+## 🎯 ロードマップ
 
-- [ ] Web UI for pipeline management
-- [ ] Integration with popular CI/CD tools
-- [ ] Support for additional container runtimes
-- [ ] Enhanced caching strategies
-- [ ] Pipeline templates and presets
+- [ ] パイプライン管理用のWeb UI
+- [ ] 人気のCI/CDツールとの統合
+- [ ] 追加のコンテナランタイムのサポート
+- [ ] 強化されたキャッシュ戦略
+- [ ] パイプラインテンプレートとプリセット
 
 ---
 
-Made with ❤️ by [yohi](https://github.com/yohi)
+❤️ で作られました by [yohi](https://github.com/yohi)
