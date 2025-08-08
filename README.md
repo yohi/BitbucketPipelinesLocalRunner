@@ -4,91 +4,91 @@
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](package.json)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue.svg)](https://www.typescriptlang.org/)
 
-🚀 **Local runner for Bitbucket Pipelines that allows developers to test pipeline configurations locally using Docker**
+🚀 **Dockerを使ってパイプライン設定をローカルでテストできるBitbucket Pipelinesのローカルランナー**
 
-## 📋 Overview
+## 📋 概要
 
-Bitbucket Pipelines Local Runner (`bbpl`) is a command-line tool that enables developers to run and test their Bitbucket Pipelines configurations locally without pushing to the repository. This tool helps catch issues early in the development process and reduces CI/CD feedback loops.
+Bitbucket Pipelines Local Runner (`bbpl`) は、開発者がリポジトリにプッシュすることなく、Bitbucket Pipelinesの設定をローカルで実行・テストできるコマンドラインツールです。このツールは、開発プロセスの早い段階で問題を発見し、CI/CDのフィードバックループを短縮するのに役立ちます。
 
-## ✨ Features
+## ✨ 機能
 
-- 🐳 **Docker Integration** - Execute pipelines in isolated Docker containers
-- ⚡ **Fast Feedback** - Test pipeline changes without committing to repository
-- 💾 **Cache Management** - Support for build caches to speed up execution
-- 📦 **Artifact Handling** - Save and restore pipeline artifacts
-- 🔍 **Configuration Validation** - Validate `bitbucket-pipelines.yml` syntax and structure
-- 🧪 **Dry Run Mode** - Preview pipeline execution without running commands
-- 📊 **Comprehensive Logging** - Detailed execution logs with multiple verbosity levels
-- ⚙️ **Environment Variables** - Full support for environment variable management
-- 🔄 **Parallel Execution** - Support for parallel pipeline steps
+- 🐳 **Docker統合** - 分離されたDockerコンテナでパイプラインを実行
+- ⚡ **高速フィードバック** - リポジトリにコミットすることなくパイプラインの変更をテスト
+- 💾 **キャッシュ管理** - 実行を高速化するビルドキャッシュをサポート
+- 📦 **アーティファクト処理** - パイプラインアーティファクトの保存と復元
+- 🔍 **設定検証** - `bitbucket-pipelines.yml`の構文と構造を検証
+- 🧪 **ドライランモード** - コマンドを実行せずにパイプライン実行をプレビュー
+- 📊 **包括的ログ** - 複数の詳細レベルでの詳細な実行ログ
+- ⚙️ **環境変数** - 環境変数管理の完全サポート
+- 🔄 **並列実行** - 並列パイプラインステップのサポート
 
-## 🚀 Quick Start
+## 🚀 クイックスタート
 
-### Installation
+### インストール
 
 ```bash
 npm install -g bitbucket-pipelines-local-runner
 ```
 
-Or run directly with npx:
+またはnpxで直接実行：
 
 ```bash
 npx bitbucket-pipelines-local-runner
 ```
 
-### Basic Usage
+### 基本的な使用方法
 
 ```bash
-# Run default pipeline
+# デフォルトパイプラインを実行
 bbpl run
 
-# Run specific pipeline
+# 特定のパイプラインを実行
 bbpl run --pipeline custom/deployment
 
-# Run branch-specific pipeline
+# ブランチ固有のパイプラインを実行
 bbpl run --branch develop
 
-# Validate configuration
+# 設定を検証
 bbpl validate
 
-# List available pipelines
+# 利用可能なパイプラインを一覧表示
 bbpl list
 
-# Initialize configuration
+# 設定を初期化
 bbpl init
 ```
 
-## 📖 Commands
+## 📖 コマンド
 
-### `run` - Execute Pipeline
+### `run` - パイプラインの実行
 
-Run a pipeline locally using Docker containers.
+Dockerコンテナを使用してパイプラインをローカルで実行します。
 
 ```bash
 bbpl run [options]
 
-Options:
-  -p, --pipeline <name>    Pipeline name (default, branch, or custom)
-  -b, --branch <name>      Branch name for branch-specific pipeline
-  -c, --custom <name>      Custom pipeline name
-  -v, --verbose            Enable verbose logging
-  -d, --dry-run           Perform dry run without executing commands
-  --config <path>         Path to configuration file
-  --env-file <path>       Path to environment variables file
+オプション:
+  -p, --pipeline <name>    パイプライン名 (default、branch、またはcustom)
+  -b, --branch <name>      ブランチ固有パイプライン用のブランチ名
+  -c, --custom <name>      カスタムパイプライン名
+  -v, --verbose            詳細ログを有効にする
+  -d, --dry-run           コマンドを実行せずにドライランを実行
+  --config <path>         設定ファイルのパス
+  --env-file <path>       環境変数ファイルのパス
 ```
 
-**Examples:**
+**例：**
 ```bash
-# Run default pipeline
+# デフォルトパイプラインを実行
 bbpl run
 
-# Run custom pipeline with verbose logging
+# 詳細ログ付きでカスタムパイプラインを実行
 bbpl run --custom deployment --verbose
 
-# Dry run for testing
+# テスト用のドライラン
 bbpl run --dry-run --verbose
 
-# Use custom config and environment files
+# カスタム設定と環境ファイルを使用
 bbpl run --config .bbpl-config.yml --env-file .env.production
 ```
 
